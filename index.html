@@ -23,11 +23,11 @@
 </head>
 <body>
     <script>
-        // Request fullscreen on page load (using Telegram Web App API)
-        window.Telegram.WebApp.requestFullscreen();
-
-        // Set header color for fullscreen
-        window.Telegram.WebApp.setHeaderColor("#000000");
+        // Check if Telegram Web App is available and request fullscreen only for versions 8.0+
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.requestFullscreen) {
+            window.Telegram.WebApp.requestFullscreen();
+            window.Telegram.WebApp.setHeaderColor("#000000");
+        }
 
         // Scene setup
         const scene = new THREE.Scene();
