@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Scene with OBJ and GLTF Models</title>
+    <title>Space Scene with OBJ Models</title>
     <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/OBJLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/MTLLoader.js"></script>
+    <!-- Update to use 'jsm' for newer versions -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/loaders/MTLLoader.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js?8.0"></script>
     <style>
         html, body {
@@ -45,17 +45,6 @@
         const light = new THREE.AmbientLight(0x404040, 2); // Soft white light
         scene.add(light);
 
-        // Load GLTF model (for GLB/Blend conversion)
-        // const gltfLoader = new THREE.GLTFLoader();
-        // let spaceship;
-
-        // gltfLoader.load('spaceship_model.glb', function(gltf) {
-        //    spaceship = gltf.scene;
-        //    spaceship.scale.set(0.5, 0.5, 0.5);
-        //    spaceship.position.set(0, 0, -5);
-        //    scene.add(spaceship);
-        // });
-
         // Load OBJ model with MTL material (for .obj and .mtl files)
         const objLoader = new THREE.OBJLoader();
         const mtlLoader = new THREE.MTLLoader();
@@ -67,6 +56,11 @@
                 object.scale.set(0.5, 0.5, 0.5); // Adjust scale
                 object.position.set(0, 0, -5); // Position the object
                 scene.add(object);
+
+                // Trigger explosion after 5 seconds
+                setTimeout(() => {
+                    explodeModel(object); // Trigger explosion after 5 seconds
+                }, 5000);
             });
         });
 
@@ -110,20 +104,9 @@
             requestAnimationFrame(animate);
             controls.update(); // Update controls for smooth camera movement
 
-            if (spaceship) {
-                spaceship.rotation.y += 0.01; // Rotate spaceship for effect
-            }
-
             renderer.render(scene, camera);
         }
         animate();
-
-        // Trigger explosion after 5 seconds (can be replaced with event triggers)
-        setTimeout(() => {
-            if (spaceship) {
-                explodeModel(spaceship); // Trigger explosion after 5 seconds
-            }
-        }, 5000);
 
         // Resize handling
         window.addEventListener('resize', () => {
