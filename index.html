@@ -4,25 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Scene with OBJ Models</title>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
-    <!-- Update to use 'jsm' for newer versions -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/loaders/OBJLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/loaders/MTLLoader.js"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js?8.0"></script>
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-        canvas {
-            display: block;
-        }
-    </style>
-</head>
-<body>
-    <script>
+    <!-- Use ES Modules for three.js -->
+    <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.module.js';
+        import { OBJLoader } from 'https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/loaders/OBJLoader.js';
+        import { MTLLoader } from 'https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/loaders/MTLLoader.js';
+        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/controls/OrbitControls.js';
+
         // Request fullscreen on page load (using Telegram Web App API)
         window.Telegram.WebApp.requestFullscreen();
 
@@ -46,8 +34,8 @@
         scene.add(light);
 
         // Load OBJ model with MTL material (for .obj and .mtl files)
-        const objLoader = new THREE.OBJLoader();
-        const mtlLoader = new THREE.MTLLoader();
+        const objLoader = new OBJLoader();
+        const mtlLoader = new MTLLoader();
 
         mtlLoader.load('VulcanDKyrClass.mtl', function(materials) {
             materials.preload();  // Preload materials
@@ -97,7 +85,7 @@
         camera.position.z = 5;
 
         // Add orbit controls to the camera
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        const controls = new OrbitControls(camera, renderer.domElement);
 
         // Animation loop
         function animate() {
@@ -115,5 +103,18 @@
             camera.updateProjectionMatrix();
         });
     </script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
 </body>
 </html>
