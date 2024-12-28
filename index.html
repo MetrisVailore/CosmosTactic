@@ -61,10 +61,10 @@
         const mtlLoader = new THREE.MTLLoader();
 
         let spaceship;
-        mtlLoader.load('VulcanDKyrClass.mtl', function(materials) {
+        mtlLoader.load('/static/VulcanDKyrClass.mtl', function(materials) {
             materials.preload();  // Preload materials
             objLoader.setMaterials(materials);
-            objLoader.load('VulcanDKyrClass.obj', function(object) {
+            objLoader.load('/static/VulcanDKyrClass.obj', function(object) {
                 spaceship = object;
                 spaceship.scale.set(0.5, 0.5, 0.5); // Adjust scale
                 spaceship.position.set(0, 0, -5); // Position the object
