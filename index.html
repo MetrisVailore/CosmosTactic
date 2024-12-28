@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Scene with OBJ Models</title>
-    <!-- Using the non-ESM version of three.min.js -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/OBJLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/MTLLoader.js"></script>
@@ -24,9 +23,16 @@
 <body>
     <script>
         // Check if Telegram Web App is available and request fullscreen only for versions 8.0+
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.requestFullscreen) {
-            window.Telegram.WebApp.requestFullscreen();
-            window.Telegram.WebApp.setHeaderColor("#000000");
+        if (window.Telegram && window.Telegram.WebApp) {
+            if (window.Telegram.WebApp.requestFullscreen) {
+                console.log("Requesting fullscreen mode for Telegram...");
+                window.Telegram.WebApp.requestFullscreen();
+                window.Telegram.WebApp.setHeaderColor("#000000");
+            } else {
+                console.log("Fullscreen is not supported in this version of Telegram Web App.");
+            }
+        } else {
+            console.log("Telegram Web App not found, continuing in browser mode...");
         }
 
         // Scene setup
