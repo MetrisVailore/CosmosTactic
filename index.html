@@ -60,17 +60,19 @@
         const objLoader = new THREE.OBJLoader();
         const mtlLoader = new THREE.MTLLoader();
 
+        let spaceship;
         mtlLoader.load('VulcanDKyrClass.mtl', function(materials) {
             materials.preload();  // Preload materials
             objLoader.setMaterials(materials);
             objLoader.load('VulcanDKyrClass.obj', function(object) {
-                object.scale.set(0.5, 0.5, 0.5); // Adjust scale
-                object.position.set(0, 0, -5); // Position the object
-                scene.add(object);
+                spaceship = object;
+                spaceship.scale.set(0.5, 0.5, 0.5); // Adjust scale
+                spaceship.position.set(0, 0, -5); // Position the object
+                scene.add(spaceship);
 
                 // Trigger explosion after 5 seconds
                 setTimeout(() => {
-                    explodeModel(object); // Trigger explosion after 5 seconds
+                    explodeModel(spaceship); // Trigger explosion after 5 seconds
                 }, 5000);
             });
         });
@@ -79,8 +81,6 @@
         function explodeModel(model) {
             const explosionDuration = 2; // Time in seconds
             const scaleFactor = 3; // How much the object scales during explosion
-
-            // Scale the model up to simulate an explosion
             const startTime = Date.now();
             const initialScale = model.scale.clone();
 
@@ -92,12 +92,15 @@
                     initialScale.y * (1 + scaleFactor * scale),
                     initialScale.z * (1 + scaleFactor * scale)
                 );
+                
+                // Make the model glow
+                model.material.emissive.set(0xff0000); // Set glowing color
 
                 if (elapsedTime < explosionDuration) {
                     requestAnimationFrame(animateExplosion);
                 } else {
-                    // Optionally, remove the model after explosion
-                    scene.remove(model);
+                    model.material.emissive.set(0x000000); // Stop glowing after explosion
+                    // Optionally keep the object in the scene
                 }
             }
 
@@ -110,10 +113,50 @@
         // Add orbit controls to the camera
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
+        // Movement variables (for spaceship movement)
+        let velocity = new THREE.Vector3(0, 0, 0);
+        const speed = 0.1;  // Movement speed
+
+        // Key handling for spaceship controls (WASD for movement, QE for vertical movement)
+        document.addEventListener('keydown', (event) => {
+            switch (event.key) {
+                case 'w':  // Move forward
+                    velocity.z = -speed;
+                    break;
+                case 's':  // Move backward
+                    velocity.z = speed;
+                    break;
+                case 'a':  // Move left
+                    velocity.x = -speed;
+                    break;
+                case 'd':  // Move right
+                    velocity.x = speed;
+                    break;
+                case 'q':  // Move up
+                    velocity.y = speed;
+                    break;
+                case 'e':  // Move down
+                    velocity.y = -speed;
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', (event) => {
+            if (['w', 's'].includes(event.key)) velocity.z = 0;
+            if (['a', 'd'].includes(event.key)) velocity.x = 0;
+            if (['q', 'e'].includes(event.key)) velocity.y = 0;
+        });
+
         // Animation loop
         function animate() {
             requestAnimationFrame(animate);
-            controls.update(); // Update controls for smooth camera movement
+
+            // Move the spaceship
+            if (spaceship) {
+                spaceship.position.add(velocity);
+            }
+
+            controls.update();  // Update controls for smooth camera movement
 
             renderer.render(scene, camera);
         }
