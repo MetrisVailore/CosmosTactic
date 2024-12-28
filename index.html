@@ -13,26 +13,31 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            overflow: hidden;  /* Remove scrollbars */
         }
         canvas {
-            display: block;
+            display: block;  /* Removes extra space around the canvas */
         }
     </style>
 </head>
 <body>
     <script>
-        // Check if Telegram Web App is available and request fullscreen only for versions 8.0+
+        // Check if we are in Telegram Web App environment
         if (window.Telegram && window.Telegram.WebApp) {
-            if (window.Telegram.WebApp.requestFullscreen) {
-                console.log("Requesting fullscreen mode for Telegram...");
+            console.log("Telegram Web App detected.");
+
+            // Request fullscreen only in Telegram Web App (if supported)
+            try {
                 window.Telegram.WebApp.requestFullscreen();
-                window.Telegram.WebApp.setHeaderColor("#000000");
-            } else {
-                console.log("Fullscreen is not supported in this version of Telegram Web App.");
+            } catch (error) {
+                console.log("Fullscreen request failed: " + error.message);
             }
+
+            // Set header color for Telegram Web App
+            window.Telegram.WebApp.setHeaderColor("#000000");
+
         } else {
-            console.log("Telegram Web App not found, continuing in browser mode...");
+            console.log("Browser environment detected. No fullscreen request.");
         }
 
         // Scene setup
