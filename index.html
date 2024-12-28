@@ -14,14 +14,27 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden;  /* Remove scrollbars */
+            overflow: hidden;
         }
         canvas {
-            display: block;  /* Removes extra space around the canvas */
+            display: block;
+        }
+        #timerNotification {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
         }
     </style>
 </head>
 <body>
+    <div id="timerNotification">Explosion in 5 seconds...</div>
     <script>
         // Check if we are in Telegram Web App environment
         if (window.Telegram && window.Telegram.WebApp) {
@@ -74,6 +87,9 @@
                 setTimeout(() => {
                     explodeModel(spaceship); // Trigger explosion after 5 seconds
                 }, 5000);
+
+                // Show timer notification
+                showTimerNotification();
             });
         });
 
@@ -107,15 +123,46 @@
             animateExplosion();
         }
 
+        // Timer notification function
+        function showTimerNotification() {
+            const notification = document.getElementById('timerNotification');
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000); // Hide after 5 seconds
+        }
+
         // Camera position
         camera.position.z = 5;
 
-        // Add orbit controls to the camera
+        // Orbit controls for general camera movement
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
         // Movement variables (for spaceship movement)
         let velocity = new THREE.Vector3(0, 0, 0);
         const speed = 0.1;  // Movement speed
+
+        // Click-to-glow functionality
+        let raycaster = new THREE.Raycaster();
+        let mouse = new THREE.Vector2();
+
+        window.addEventListener('click', onMouseClick, false);
+
+        function onMouseClick(event) {
+            // Convert mouse click position to normalized device coordinates
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.update();
+
+            // Check for intersection with spaceship
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObject(spaceship);
+            if (intersects.length > 0) {
+                // Apply glow effect when spaceship is clicked
+                spaceship.material.emissive.set(0x00ff00); // Set green glow
+            }
+        }
 
         // Key handling for spaceship controls (WASD for movement, QE for vertical movement)
         document.addEventListener('keydown', (event) => {
@@ -132,11 +179,17 @@
                 case 'd':  // Move right
                     velocity.x = speed;
                     break;
-                case 'q':  // Move up
-                    velocity.y = speed;
+                case 'q':  // Rotate left (counterclockwise)
+                    spaceship.rotation.y += 0.1;
                     break;
-                case 'e':  // Move down
-                    velocity.y = -speed;
+                case 'e':  // Rotate right (clockwise)
+                    spaceship.rotation.y -= 0.1;
+                    break;
+                case 'r':  // Rotate up
+                    spaceship.rotation.x += 0.1;
+                    break;
+                case 'f':  // Rotate down
+                    spaceship.rotation.x -= 0.1;
                     break;
             }
         });
@@ -145,6 +198,41 @@
             if (['w', 's'].includes(event.key)) velocity.z = 0;
             if (['a', 'd'].includes(event.key)) velocity.x = 0;
             if (['q', 'e'].includes(event.key)) velocity.y = 0;
+        });
+
+        // Mouse control for zoom (scroll wheel) and right-click look
+        let isRightClickDown = false;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let rotationSpeed = 0.005;
+
+        // Zoom control using the mouse wheel
+        window.addEventListener('wheel', (event) => {
+            camera.position.z += event.deltaY * 0.05; // Zoom in/out
+        });
+
+        // Right click drag to rotate the camera
+        window.addEventListener('mousedown', (event) => {
+            if (event.button === 2) {
+                isRightClickDown = true;
+                lastMouseX = event.clientX;
+                lastMouseY = event.clientY;
+            }
+        });
+
+        window.addEventListener('mousemove', (event) => {
+            if (isRightClickDown) {
+                const deltaX = event.clientX - lastMouseX;
+                const deltaY = event.clientY - lastMouseY;
+                camera.rotation.y -= deltaX * rotationSpeed; // Rotate around the Y axis
+                camera.rotation.x -= deltaY * rotationSpeed; // Rotate around the X axis
+                lastMouseX = event.clientX;
+                lastMouseY = event.clientY;
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            isRightClickDown = false;
         });
 
         // Animation loop
