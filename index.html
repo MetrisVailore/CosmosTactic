@@ -1,63 +1,136 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>3D Telegram Game (Fullscreen)</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Scene with OBJ and GLTF Models</title>
     <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/MTLLoader.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js?8.0"></script>
     <style>
-        /* Ensure the body and html elements take up the full screen and remove any margins/paddings */
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden;  /* Remove scrollbars */
+            overflow: hidden;
         }
-
-        /* Make the canvas (Three.js) take up the full screen */
         canvas {
-            display: block;  /* Removes extra space around the canvas */
+            display: block;
         }
     </style>
 </head>
 <body>
     <script>
-        // Request fullscreen when the page loads (using Telegram Web App API)
+        // Request fullscreen on page load (using Telegram Web App API)
         window.Telegram.WebApp.requestFullscreen();
-        
-        // Set header color (optional but recommended for fullscreen mode)
+
+        // Set header color for fullscreen
         window.Telegram.WebApp.setHeaderColor("#000000");
 
-        // Create 3D scene
+        // Scene setup
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Create a cube
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
+        // Add space background (skybox)
+        const textureLoader = new THREE.TextureLoader();
+        const spaceTexture = textureLoader.load('space_texture.jpg'); // Use your own space texture
+        scene.background = spaceTexture;
+
+        // Lighting
+        const light = new THREE.AmbientLight(0x404040, 2); // Soft white light
+        scene.add(light);
+
+        // Load GLTF model (for GLB/Blend conversion)
+        // const gltfLoader = new THREE.GLTFLoader();
+        // let spaceship;
+
+        // gltfLoader.load('spaceship_model.glb', function(gltf) {
+        //    spaceship = gltf.scene;
+        //    spaceship.scale.set(0.5, 0.5, 0.5);
+        //    spaceship.position.set(0, 0, -5);
+        //    scene.add(spaceship);
+        // });
+
+        // Load OBJ model with MTL material (for .obj and .mtl files)
+        const objLoader = new THREE.OBJLoader();
+        const mtlLoader = new THREE.MTLLoader();
+
+        mtlLoader.load('VulcanDKyrClass.mtl', function(materials) {
+            materials.preload();  // Preload materials
+            objLoader.setMaterials(materials);
+            objLoader.load('VulcanDKyrClass.obj', function(object) {
+                object.scale.set(0.5, 0.5, 0.5); // Adjust scale
+                object.position.set(0, 0, -5); // Position the object
+                scene.add(object);
+            });
+        });
+
+        // Explosion animation function
+        function explodeModel(model) {
+            const explosionDuration = 2; // Time in seconds
+            const scaleFactor = 3; // How much the object scales during explosion
+
+            // Scale the model up to simulate an explosion
+            const startTime = Date.now();
+            const initialScale = model.scale.clone();
+
+            function animateExplosion() {
+                const elapsedTime = (Date.now() - startTime) / 1000; // Convert to seconds
+                const scale = Math.min(elapsedTime / explosionDuration, 1); // Animate over time
+                model.scale.set(
+                    initialScale.x * (1 + scaleFactor * scale),
+                    initialScale.y * (1 + scaleFactor * scale),
+                    initialScale.z * (1 + scaleFactor * scale)
+                );
+
+                if (elapsedTime < explosionDuration) {
+                    requestAnimationFrame(animateExplosion);
+                } else {
+                    // Optionally, remove the model after explosion
+                    scene.remove(model);
+                }
+            }
+
+            animateExplosion();
+        }
+
+        // Camera position
         camera.position.z = 5;
 
-        // Update canvas size on window resize
+        // Add orbit controls to the camera
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update(); // Update controls for smooth camera movement
+
+            if (spaceship) {
+                spaceship.rotation.y += 0.01; // Rotate spaceship for effect
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Trigger explosion after 5 seconds (can be replaced with event triggers)
+        setTimeout(() => {
+            if (spaceship) {
+                explodeModel(spaceship); // Trigger explosion after 5 seconds
+            }
+        }, 5000);
+
+        // Resize handling
         window.addEventListener('resize', () => {
             renderer.setSize(window.innerWidth, window.innerHeight);
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
         });
-
-        // Animation loop
-        function animate() {
-            requestAnimationFrame(animate);
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
-            renderer.render(scene, camera);
-        }
-
-        // Start animation
-        animate();
     </script>
 </body>
 </html>
