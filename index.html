@@ -4,10 +4,24 @@
     <title>3D Telegram Game (Fullscreen)</title>
     <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js?8.0"></script>
+    <style>
+        /* Ensure the body and html elements take up the full screen and remove any margins/paddings */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;  /* Remove scrollbars */
+        }
+
+        /* Make the canvas (Three.js) take up the full screen */
+        canvas {
+            display: block;  /* Removes extra space around the canvas */
+        }
+    </style>
 </head>
 <body>
     <script>
-        // Request fullscreen when the page loads
+        // Request fullscreen when the page loads (using Telegram Web App API)
         window.Telegram.WebApp.requestFullscreen();
         
         // Set header color (optional but recommended for fullscreen mode)
@@ -43,11 +57,6 @@
         }
 
         // Start animation
-        function startAnimation() {
-            cube.material.color.set(0xff0000); // Change cube color
-            setTimeout(() => cube.material.color.set(0x00ff00), 1000); // Reset color
-        }
-
         animate();
     </script>
 </body>
