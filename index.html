@@ -4,19 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Scene with OBJ Models</title>
+    <!-- Include Three.js core library -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/OBJLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/MTLLoader.js"></script>
+    
+    <!-- Load OBJLoader and MTLLoader from the official Three.js GitHub -->
+    <script src="https://raw.githubusercontent.com/mrdoob/three.js/r154/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://raw.githubusercontent.com/mrdoob/three.js/r154/examples/js/loaders/MTLLoader.js"></script>
+
+    <!-- Include Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js?8.0"></script>
+    
     <style>
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden;  /* Remove scrollbars */
+            overflow: hidden;
         }
         canvas {
-            display: block;  /* Removes extra space around the canvas */
+            display: block;
         }
     </style>
 </head>
@@ -35,7 +41,6 @@
 
             // Set header color for Telegram Web App
             window.Telegram.WebApp.setHeaderColor("#000000");
-
         } else {
             console.log("Browser environment detected. No fullscreen request.");
         }
@@ -49,7 +54,7 @@
 
         // Add space background (skybox)
         const textureLoader = new THREE.TextureLoader();
-        const spaceTexture = textureLoader.load('space_texture.jpg'); // Use your own space texture
+        const spaceTexture = textureLoader.load('space_texture.jpg'); // Replace with your own space texture
         scene.background = spaceTexture;
 
         // Lighting
