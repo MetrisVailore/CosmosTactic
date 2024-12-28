@@ -89,7 +89,7 @@
                 }, 5000);
 
                 // Show timer notification
-                showTimerNotification();
+                showTimerNotification(5);
             });
         });
 
@@ -123,13 +123,22 @@
             animateExplosion();
         }
 
-        // Timer notification function
-        function showTimerNotification() {
+        // Timer notification function with countdown
+        let countdownTimer;
+        function showTimerNotification(seconds) {
             const notification = document.getElementById('timerNotification');
             notification.style.display = 'block';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 5000); // Hide after 5 seconds
+            let remainingTime = seconds;
+            notification.textContent = `Explosion in ${remainingTime} seconds...`;
+
+            countdownTimer = setInterval(() => {
+                remainingTime--;
+                notification.textContent = `Explosion in ${remainingTime} seconds...`;
+                if (remainingTime <= 0) {
+                    clearInterval(countdownTimer);
+                    notification.style.display = 'none';
+                }
+            }, 1000); // Update every second
         }
 
         // Camera position
@@ -166,18 +175,27 @@
 
         // Key handling for spaceship controls (WASD for movement, QE for vertical movement)
         document.addEventListener('keydown', (event) => {
+            const cameraDirection = new THREE.Vector3();
+            camera.getWorldDirection(cameraDirection);
+
             switch (event.key) {
-                case 'w':  // Move forward
-                    velocity.z = -speed;
+                case 'w':  // Move forward (in camera direction)
+                    velocity.set(cameraDirection.x * speed, cameraDirection.y * speed, cameraDirection.z * speed);
                     break;
-                case 's':  // Move backward
-                    velocity.z = speed;
+                case 's':  // Move backward (opposite camera direction)
+                    velocity.set(-cameraDirection.x * speed, -cameraDirection.y * speed, -cameraDirection.z * speed);
                     break;
-                case 'a':  // Move left
-                    velocity.x = -speed;
+                case 'a':  // Move left (perpendicular to camera direction)
+                    const leftDirection = new THREE.Vector3();
+                    leftDirection.crossVectors(cameraDirection, new THREE.Vector3(0, 1, 0)); // Get left vector
+                    leftDirection.normalize();
+                    velocity.set(leftDirection.x * speed, leftDirection.y * speed, leftDirection.z * speed);
                     break;
                 case 'd':  // Move right
-                    velocity.x = speed;
+                    const rightDirection = new THREE.Vector3();
+                    rightDirection.crossVectors(cameraDirection, new THREE.Vector3(0, -1, 0)); // Get right vector
+                    rightDirection.normalize();
+                    velocity.set(rightDirection.x * speed, rightDirection.y * speed, rightDirection.z * speed);
                     break;
                 case 'q':  // Rotate left (counterclockwise)
                     spaceship.rotation.y += 0.1;
@@ -194,10 +212,8 @@
             }
         });
 
-        document.addEventListener('keyup', (event) => {
-            if (['w', 's'].includes(event.key)) velocity.z = 0;
-            if (['a', 'd'].includes(event.key)) velocity.x = 0;
-            if (['q', 'e'].includes(event.key)) velocity.y = 0;
+        document.addEventListener('keyup', () => {
+            velocity.set(0, 0, 0);  // Stop movement when the key is released
         });
 
         // Mouse control for zoom (scroll wheel) and right-click look
